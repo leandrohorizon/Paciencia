@@ -1,0 +1,45 @@
+.divisoes{
+	position: absolute;
+	width: 610px;
+	height: 200px;
+	left: 50%;
+	margin-left: -300px;
+}
+
+[draggable] {
+  -moz-user-select: none;
+  -khtml-user-select: none;
+  -webkit-user-select: none;
+  user-select: none;
+  /* Required to make elements draggable in old WebKit */
+  -khtml-user-drag: element;
+  -webkit-user-drag: element;
+}
+
+.divisao{
+	/* position: absolute; */
+	border: solid 0.1px;
+	width: 200px;
+	height: 200px;
+	background: orange;
+	cursor: move;
+	
+	opacity: 0.4;
+	display: inline-block;
+	padding: 0px;
+	
+	text-align: center;
+	line-height:204px;
+	font-size: 100pt;
+}
+
+.divisao.over {
+  border: 0.1px dashed #000;
+}
+
+/* #div2{ */
+	/* left: 200px; */
+/* } */
+/* #div3{ */
+	/* right: 0px; */
+/* } */
