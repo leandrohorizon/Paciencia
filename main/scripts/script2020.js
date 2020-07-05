@@ -190,11 +190,6 @@
                     carta.stopPropagation();
                 }
 
-                console.log(`${this.getNumero()} ${this.getNaipe()} 
-                virada:${this.virada}
-                enfileirado: ${this.enfileirado}
-                alocado: ${this.alocado}`);
-
                 if (!this.virada) {
                     if (cartaSelecionada) {
                         // console.log(cartaSelecionada, this);
@@ -217,9 +212,10 @@
             onmouseout: (e) => {
                 e.stopPropagation();
                 let carta = e.currentTarget;
-                if (carta.isCarta && carta.childNodes[1]);
-                carta.childNodes[1].style.marginTop = "20px";
-            }
+                if (carta.isCarta && carta.childNodes[1])
+                    carta.childNodes[1].style.marginTop = "20px";
+            },
+
         }
     }
 
