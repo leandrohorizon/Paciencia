@@ -14,11 +14,11 @@
         return {
             naipe: null,
             numero: null,
-            element,
             enfileirado: false,
             alocado: false,
             comprada: false,
             virada: false,
+            isCarta: true,
             setVirada(virada) {
                 if (virada) {
                     this.className = "virada";
@@ -109,8 +109,9 @@
             },
 
             sobrepor(carta) {
+                // console.log(this.parentNode.classList);
                 if (!this.alocado) {
-                    if (!this.comprada && !this.virada && !this.enfileirado) {
+                    if (!this.comprada && !this.virada && !this.childNodes[1]) {
                         if (this.numero === carta.numero + 1) {
                             if (this.naipe % 2 ^ carta.naipe % 2) {
                                 let cartaPai = carta.parentNode;
@@ -121,18 +122,18 @@
                                 carta.comprada = false;
                                 carta.alocado = false;
                                 this.enfileirado = true;
-                                element.appendChild(carta);
+                                this.appendChild(carta);
                             }
                         }
                     }
                 } else {
-                    if (this.naipe === carta.naipe) {
+                    if (this.naipe === carta.naipe && !carta.childNodes[1]) {
                         if (this.numero === carta.numero - 1) {
                             let cartaPai = carta.parentNode;
                             if (cartaPai.virada) cartaPai.setVirada(false);
                             carta.comprada = false;
                             carta.alocado = true;
-                            element.parentNode.appendChild(carta);
+                            this.parentNode.appendChild(carta);
                         }
                     }
                 }
@@ -189,9 +190,14 @@
                     carta.stopPropagation();
                 }
 
+                console.log(`${this.getNumero()} ${this.getNaipe()} 
+                virada:${this.virada}
+                enfileirado: ${this.enfileirado}
+                alocado: ${this.alocado}`);
+
                 if (!this.virada) {
                     if (cartaSelecionada) {
-                        console.log(cartaSelecionada, this);
+                        // console.log(cartaSelecionada, this);
                         this.sobrepor(cartaSelecionada);
                         cartaSelecionada.classList.remove("selecionada");
                         cartaSelecionada = null;
@@ -200,16 +206,27 @@
                         cartaSelecionada.classList.add("selecionada");
                     }
                 }
+            },
+            onmouseover: (e) => {
+                e.stopPropagation();
+                let carta = e.currentTarget;
+                if (!carta.virada && carta.childNodes[1]) {
+                    carta.childNodes[1].style.marginTop = "40px";
+                }
+            },
+            onmouseout: (e) => {
+                e.stopPropagation();
+                let carta = e.currentTarget;
+                if (carta.isCarta && carta.childNodes[1]);
+                carta.childNodes[1].style.marginTop = "20px";
             }
         }
     }
 
-
-
     for (let numero = 1; numero < 14; numero++) {
         for (let naipe = 0; naipe < 4; naipe++) {
             let element = document.createElement("carta");
-            element.classList.add("carta");
+            // element.classList.add("carta");
             let carta = Object.assign(element, criarCarta(element));
             // let carta = criarCarta(element);
             carta.numero = numero;
@@ -219,9 +236,9 @@
         }
     }
 
-    // cartas.sort(() => {
-    //     return (Math.round(Math.random()) - 0.5);
-    // });
+    cartas.sort(() => {
+        return (Math.round(Math.random()) - 0.5);
+    });
 
     Array.from(casas).forEach((element, index) => {
         element.onclick = alocarCasa;
@@ -277,8 +294,6 @@
         }
     }
 
-    // Array.from(casas).forEach((element, index) => {
-    //     element.onclick = alocarCasa;
     Array.from(naipes).forEach((element) => {
         element.onclick = (e) => {
             if (cartaSelecionada) {
@@ -290,6 +305,7 @@
                     if (cartaPai.virada) cartaPai.setVirada(false);
                     cartaSelecionada.alocado = true;
                     cartaSelecionada.comprada = false;
+                    cartaSelecionada.enfileirado = false;
                     e.target.appendChild(cartaSelecionada);
                 }
                 cartaSelecionada.classList.remove("selecionada");

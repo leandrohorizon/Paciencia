@@ -166,6 +166,10 @@ carta carta {
     opacity: 0.7;
 }
 
-carta:hover:not(.virada) carta {
+/* carta:hover:not(.virada)> carta {
     margin-top: 40px;
-}
+} */
+
+/* carta> :nth-child(2) { */
+    /* margin-top: 40px; */
+/* } */
