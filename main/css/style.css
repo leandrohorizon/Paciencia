@@ -7,13 +7,14 @@
     --corPf: #ddd9ce;
     --corVi: #ddd9ce;
     --corPo: #211E21;
-    --fontF: 'Segoe UI Symbol';
+    --fontF: 'Do Hyeon', sans-serif;
+    /* --fontF: 'Segoe UI Symbol'; */
 }
 
-@font-face {
+/* @font-face {
     font-family: 'Segoe UI Symbol';
     src: url('../fontes/segoe-ui-symbol.ttf') format('ttf');
-}
+} */
 
 @import url('https://fonts.googleapis.com/css?family=Do+Hyeon');
 * {
