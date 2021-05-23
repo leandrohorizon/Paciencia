@@ -166,6 +166,7 @@ function realocarCartas() {
 function comprar() {
   this.removeEventListener("mouseup", comprar);
   desvirar(this);
+
   if (divComprado.lastChild != null)
     divComprado.lastChild.classList.remove("sombra");
   divComprado.appendChild(this);
@@ -203,6 +204,7 @@ function handleDragStart(e) {
 
 function handleDrop(e) {
   if (e.stopPropagation) {
+    e.stopPropagation();
   }
   var pai = cartaArrastada.parentNode;
 
@@ -227,6 +229,7 @@ function handleDrop(e) {
 
 function handleDragOver(e) {
   if (e.preventDefault) {
+    e.preventDefault();
   }
 }
 
@@ -237,6 +240,7 @@ function handleDragEnd(e) {
 function moverParaCasa(e) {
   if (cartaArrastada.valor != "K" || this.childElementCount > 0) return;
   if (e.stopPropagation) {
+    e.stopPropagation();
   }
 
   if (cartaArrastada.parentNode.classList[0] == "carta")
@@ -265,6 +269,7 @@ for (i = 0; i < naipes.length; i++) {
 
 function duploClick(e) {
   if (e.stopPropagation) {
+    e.stopPropagation();
   }
 
   for (i = 0; i < naipes.length; i++) {
@@ -307,6 +312,7 @@ function isWin2() {
       }
     });
   });
+
   if (b && !iniciando) alert("você ganhou");
 }
 
@@ -314,6 +320,7 @@ var cartaSelecionada;
 
 function selecionarCarta(e) {
   if (e.stopPropagation) {
+    e.stopPropagation();
   }
   if (cartaSelecionada == null) {
     if (this.classList[0] != "carta") return;
