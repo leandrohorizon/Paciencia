@@ -107,13 +107,13 @@ function dom(suit){
       actions.source = this;
     },
 
-    handleDragOver: function(e) {
-      if (e.preventDefault) {
-        e.preventDefault();
-      }
+    // handleDragOver: function(e) {
+    //   if (e.preventDefault) {
+    //     e.preventDefault();
+    //   }
 
-      if (!this.is_turned_up) return;
-    },
+    //   if (!this.is_turned_up) return;
+    // },
 
     handleDrop: function(e) {
       if (e.stopPropagation) {
@@ -180,7 +180,7 @@ function create_deck(){
     card_dom = card.to_dom
 
     card_dom.addEventListener("dragstart", card.handleDragStart.bind(card), false);
-    card_dom.addEventListener("dragover", card.handleDragOver.bind(card), false);
+    // card_dom.addEventListener("dragover", card.handleDragOver.bind(card), false);
     card_dom.addEventListener("drop", card.handleDrop.bind(card), false);
     card_dom.addEventListener("mouseup", card.mouseup.bind(card), false);
 
@@ -189,16 +189,74 @@ function create_deck(){
   return deck;
 }
 
-let deck = create_deck();
-
-deck.sort(() => Math.random() - 0.5);
-
 const divBaralho = document.getElementById("baralho");
 const divComprado = document.getElementById("comprado");
 
 let casas = document.querySelectorAll(".casa");
 let naipes = document.querySelectorAll(".naipe");
 let qtdCasa = 1;
+
+function game(){
+  let deck = create_deck();
+
+  deck.sort(() => Math.random() - 0.5);
+
+  return {
+    start: function(){
+      this.distribute_cards();
+    },
+
+    distribute_cards: function(){
+      this.distribute_in_deck();
+      this.distribute_in_table();
+    },
+
+    distribute_in_deck: function(){
+      deck.forEach(function(card){
+        card_dom = card.to_dom;
+
+        card.turn_down();
+        divBaralho.appendChild(card_dom);
+        card.live_in = "deck";
+      });
+    },
+
+    distribute_in_table: function(){
+      let qtd = 1;
+
+      casas.forEach(function(casa){
+        let parent_card = null;
+        let parent_dom = casa;
+
+        for (index = 0; index < qtd; index++){
+          card = deck.pop();
+          card_dom = card.to_dom;
+
+          parent_dom.appendChild(card_dom);
+
+          card.live_in = "table";
+          card.parent = parent_card;
+
+          if (parent_dom != casa)
+            card_dom.setAttribute("style", "top: 20px;");
+
+          parent_dom = card_dom;
+          parent_card = card;
+
+          if (index < qtd - 1) {
+            card.turn_down();
+          } else {
+            card.turn_up();
+          }
+        }
+
+        qtd++;
+      });
+    }
+  }
+}
+
+game().start();
 
 function handleDragOver2(e) {
   if (e.preventDefault) {
@@ -256,55 +314,6 @@ for (i = 0; i < naipes.length; i++) {
   naipes[i].addEventListener("dragend", handleDragEnd2, false);
 
   // naipes[i].addEventListener("click", selecionarCarta, false);
-}
-
-distribute_cards();
-
-function distribute_cards() {
-  let qtd = qtdCasa;
-  let index2 = 0;
-
-  for (index = 0; index < casas.length; index++) {
-    let parent_card = null;
-    let pai = casas[index];
-
-    for (; index2 < qtd; index2++) {
-      card = deck[index2];
-      card_dom = deck[index2].to_dom;
-
-      pai.appendChild(card_dom);
-      card.live_in = "table";
-      card.parent = parent_card;
-
-      if (pai.className != "casa")
-        card_dom.setAttribute("style", "top: 20px;");
-
-      pai = card_dom;
-      parent_card = card;
-
-      if (index2 < qtd - 1) {
-        card.turn_down();
-      } else {
-        card.turn_up();
-      }
-      // deck[index2].classList.add("sombra");
-    }
-
-    qtd = index2 + index + qtdCasa + 1;
-  }
-
-  for (i = index2; i < deck.length; i++) {
-    card = deck[i];
-    card_dom = deck[i].to_dom;
-
-    card.turn_down();
-    divBaralho.appendChild(card_dom);
-    card.live_in = "deck";
-
-    // if (i == deck.length - 1) card_dom.classList.add("sombra");
-
-    iniciando = false;
-  }
 }
 
 divBaralho.addEventListener("mouseup", voltarCartas);
