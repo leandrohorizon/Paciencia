@@ -9,7 +9,7 @@ function create_card(suit, value){
 
     ...stack(),
     ...translate(),
-    ...dom(suit)
+    ...dom()
   }
 }
 
@@ -90,7 +90,7 @@ function stack(){
   }
 }
 
-function dom(suit){
+function dom(){
   const div = document.createElement('div');
   div.classList.add('card');
 
@@ -107,14 +107,6 @@ function dom(suit){
       actions.source = this;
     },
 
-    // handleDragOver: function(e) {
-    //   if (e.preventDefault) {
-    //     e.preventDefault();
-    //   }
-
-    //   if (!this.is_turned_up) return;
-    // },
-
     handleDrop: function(e) {
       if (e.stopPropagation) {
         e.stopPropagation();
@@ -124,7 +116,6 @@ function dom(suit){
 
       this.set_child(actions.source)
     },
-    // handleDragEnd
 
     mouseup: function(e){
       if (e.stopPropagation) {
@@ -164,42 +155,126 @@ function translate(){
   }
 }
 
-let actions = {
-  source: null,
-  bought_cards: []
-}
-
 function create_deck(){
-  let deck = [];
-  for (let i = 0; i < 52; i++){
-    let suit = ['clubs', 'diamonds', 'hearts', 'spades'][Math.floor(i/13)];
-    let value = (i % 13) + 1;
+  return {
+    cards: function(){
+      let array = new Array(52).fill(null)
 
-    card = create_card(suit, value);
+      return array.map(function(_, index){
+        let suit = ['clubs', 'diamonds', 'hearts', 'spades'][Math.floor(index/13)];
+        let value = (index % 13) + 1;
 
-    card_dom = card.to_dom
+        card = create_card(suit, value);
 
-    card_dom.addEventListener("dragstart", card.handleDragStart.bind(card), false);
-    // card_dom.addEventListener("dragover", card.handleDragOver.bind(card), false);
-    card_dom.addEventListener("drop", card.handleDrop.bind(card), false);
-    card_dom.addEventListener("mouseup", card.mouseup.bind(card), false);
+        card_dom = card.to_dom
 
-    deck.push(card);
+        card_dom.addEventListener("dragstart", card.handleDragStart.bind(card), false);
+        card_dom.addEventListener("drop", card.handleDrop.bind(card), false);
+        card_dom.addEventListener("mouseup", card.mouseup.bind(card), false);
+
+        return card;
+      })
+    },
+
+    to_dom: function(){
+      let deck_dom = document.getElementById("baralho");
+
+      deck_dom.addEventListener("mouseup", voltarCartas);
+
+      function voltarCartas(e){
+        if (e.stopPropagation) {
+          e.stopPropagation();
+        }
+
+        if (actions.bought_cards.length == 0) return;
+
+        let cards = actions.bought_cards;
+
+        cards.forEach(card => {
+          if (card.live_in != "deck") return;
+
+          card.turn_down();
+          deck_dom.appendChild(card.to_dom);
+        });
+
+        actions.bought_cards = [];
+      }
+
+      return deck_dom;
+    }
   }
-  return deck;
 }
 
-const divBaralho = document.getElementById("baralho");
-const divComprado = document.getElementById("comprado");
+function create_tables(){
+  let tables = document.querySelectorAll(".casa");
+  let prevent_default = (e) => {
+    if (e.preventDefault) {
+      e.preventDefault();
+    }
+  }
 
-let casas = document.querySelectorAll(".casa");
-let naipes = document.querySelectorAll(".naipe");
-let qtdCasa = 1;
+  function moverParaCasa(e) {
+    if (e.preventDefault) {
+      e.preventDefault();
+    }
+
+    let card = actions.source;
+
+    if (card.value != 13) return;
+
+    card.turn_up_parent(card);
+
+    e.target.appendChild(card.to_dom);
+    card.live_in = "table";
+    card.to_dom.setAttribute("style", "top: 0px;");
+  }
+
+  return [...tables].map(table => {
+    table.addEventListener("dragover", prevent_default, false);
+    table.addEventListener("drop", moverParaCasa, false);
+    table.addEventListener("dragend", prevent_default, false);
+
+    return table;
+  })
+}
+
+function create_houses(){
+  let houses = document.querySelectorAll(".naipe");
+
+  let prevent_default = (e) => {
+    if (e.preventDefault) {
+      e.preventDefault();
+    }
+  }
+
+  function moverParaNaipe(e){
+    if (e.preventDefault) {
+      e.preventDefault();
+    }
+
+    let card = actions.source;
+
+    if (card.value != 1) return;
+
+    card.turn_up_parent(card);
+
+    e.target.appendChild(card.to_dom);
+    card.live_in = "house";
+    card.to_dom.setAttribute("style", "top: 0px;");
+  }
+
+  return [...houses].map(house => {
+    house.addEventListener("dragover", prevent_default, false);
+    house.addEventListener("drop", moverParaNaipe, false);
+    house.addEventListener("dragend", prevent_default, false);
+
+    return house;
+  })
+}
 
 function game(){
   let deck = create_deck();
-
-  deck.sort(() => Math.random() - 0.5);
+  let cards = deck.cards().sort(() => Math.random() - 0.5);
 
   return {
     start: function(){
@@ -207,12 +282,12 @@ function game(){
     },
 
     distribute_cards: function(){
-      this.distribute_in_deck();
       this.distribute_in_table();
+      this.distribute_in_deck();
     },
 
     distribute_in_deck: function(){
-      deck.forEach(function(card){
+      cards.forEach(function(card){
         card_dom = card.to_dom;
 
         card.turn_down();
@@ -224,12 +299,12 @@ function game(){
     distribute_in_table: function(){
       let qtd = 1;
 
-      casas.forEach(function(casa){
+      tables.forEach(function(casa){
         let parent_card = null;
         let parent_dom = casa;
 
         for (index = 0; index < qtd; index++){
-          card = deck.pop();
+          card = cards.pop();
           card_dom = card.to_dom;
 
           parent_dom.appendChild(card_dom);
@@ -256,83 +331,14 @@ function game(){
   }
 }
 
+const actions = {
+  source: null,
+  bought_cards: []
+}
+
+const tables = create_tables();
+const houses = create_houses();
+const divBaralho = create_deck().to_dom();
+const divComprado = document.getElementById("comprado");
+
 game().start();
-
-function handleDragOver2(e) {
-  if (e.preventDefault) {
-    e.preventDefault();
-  }
-}
-
-function handleDragEnd2(e) {
-  if (e.preventDefault) {
-    e.preventDefault();
-  }
-}
-
-function moverParaCasa(e) {
-  if (e.preventDefault) {
-    e.preventDefault();
-  }
-
-  let card = actions.source;
-
-  if (card.value != 13) return;
-
-  card.turn_up_parent(card);
-
-  e.target.appendChild(card.to_dom);
-  card.live_in = "table";
-  card.to_dom.setAttribute("style", "top: 0px;");
-}
-
-for (i = 0; i < casas.length; i++) {
-  casas[i].addEventListener("dragover", handleDragOver2, false);
-  casas[i].addEventListener("drop", moverParaCasa, false);
-  casas[i].addEventListener("dragend", handleDragEnd2, false);
-}
-
-function moverParaNaipe(e){
-  if (e.preventDefault) {
-    e.preventDefault();
-  }
-
-  let card = actions.source;
-
-  if (card.value != 1) return;
-
-  card.turn_up_parent(card);
-
-  e.target.appendChild(card.to_dom);
-  card.live_in = "house";
-  card.to_dom.setAttribute("style", "top: 0px;");
-}
-
-for (i = 0; i < naipes.length; i++) {
-  naipes[i].addEventListener("dragover", handleDragOver2, false);
-  naipes[i].addEventListener("drop", moverParaNaipe, false);
-  naipes[i].addEventListener("dragend", handleDragEnd2, false);
-
-  // naipes[i].addEventListener("click", selecionarCarta, false);
-}
-
-divBaralho.addEventListener("mouseup", voltarCartas);
-
-function voltarCartas(e){
-  if (e.stopPropagation) {
-    e.stopPropagation();
-  }
-
-  if (actions.bought_cards.length == 0) return;
-
-  let cards = actions.bought_cards;
-
-  cards.forEach(card => {
-    if (card.live_in != "deck") return;
-
-    card.turn_down();
-    divBaralho.appendChild(card.to_dom);
-  });
-
-  actions.bought_cards = [];
-}
