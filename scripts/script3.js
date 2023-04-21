@@ -16,15 +16,19 @@ function create_card(suit, value){
 function stack(){
   return {
     set_child: function(card){
-      if (this.is_stackable(card)){
-        this.turn_up_parent(card);
+      if (!this.is_stackable(card)) return;
 
-        this.child = card;
-        card.parent = this;
-        card.live_in = this.live_in;
-
-        this.to_dom.appendChild(card.to_dom);
+      if (this.live_in == 'house'){
+        card.to_dom.setAttribute("style", "top: 0px;");
       }
+
+      this.turn_up_parent(card);
+
+      this.child = card;
+      card.parent = this;
+      card.live_in = this.live_in;
+
+      this.to_dom.appendChild(card.to_dom);
     },
 
     is_stackable: function(card){
@@ -66,6 +70,7 @@ function stack(){
       this.to_dom.classList.remove("cartaVirada");
       this.to_dom.innerHTML = this.translate_value() + this.translate_suits();
       this.to_dom.setAttribute("draggable", "true");
+      this.to_dom.classList.add(this.suit);
     },
 
     turn_down: function(){
@@ -73,6 +78,7 @@ function stack(){
       this.to_dom.classList.add("cartaVirada");
       this.to_dom.innerHTML = "";
       this.to_dom.setAttribute("draggable", "false");
+      this.to_dom.classList.remove(this.suit);
     },
 
     turn_up_parent: function(card){
@@ -87,7 +93,6 @@ function stack(){
 function dom(suit){
   const div = document.createElement('div');
   div.classList.add('card');
-  div.classList.add(suit);
 
   return {
     to_dom: div,
@@ -216,13 +221,11 @@ function moverParaCasa(e) {
 
   if (card.value != 13) return;
 
-  if (card.live_in == 'table' && card.parent != null){
-    card.parent.turn_up();
-    card.parent.child = null;
-  }
+  card.turn_up_parent(card);
 
   e.target.appendChild(card.to_dom);
   card.live_in = "table";
+  card.to_dom.setAttribute("style", "top: 0px;");
 }
 
 for (i = 0; i < casas.length; i++) {
@@ -244,6 +247,7 @@ function moverParaNaipe(e){
 
   e.target.appendChild(card.to_dom);
   card.live_in = "house";
+  card.to_dom.setAttribute("style", "top: 0px;");
 }
 
 for (i = 0; i < naipes.length; i++) {
