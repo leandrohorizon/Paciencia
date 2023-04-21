@@ -16,9 +16,6 @@ function create_card(suit, value){
 function stack(){
   return {
     set_child: function(card){
-      console.log(this, card)
-      console.log(this.is_stackable(card));
-
       if (this.is_stackable(card)){
         this.turn_up_parent(card);
 
@@ -36,7 +33,8 @@ function stack(){
       if (!card.is_turned_up) return false;
 
       if(this.live_in == 'house'){
-        console.log(card.same_suit(this), this.is_bigger_than(card));
+        if (card.child != null) return false;
+
         return card.same_suit(this) && this.is_bigger_than(card)
       }
 
@@ -128,12 +126,11 @@ function dom(suit){
         e.stopPropagation();
       }
 
-      console.log(this);
-
       if (this.live_in == 'deck' && !this.is_turned_up){
         this.turn_up();
 
         divComprado.appendChild(e.target);
+        actions.bought_cards.push(this)
       }
     }
 
@@ -164,6 +161,7 @@ function translate(){
 
 let actions = {
   source: null,
+  bought_cards: []
 }
 
 function create_deck(){
@@ -188,7 +186,7 @@ function create_deck(){
 
 let deck = create_deck();
 
-// deck.sort(() => Math.random() - 0.5);
+deck.sort(() => Math.random() - 0.5);
 
 const divBaralho = document.getElementById("baralho");
 const divComprado = document.getElementById("comprado");
@@ -306,3 +304,22 @@ function distribute_cards() {
 }
 
 divBaralho.addEventListener("mouseup", voltarCartas);
+
+function voltarCartas(e){
+  if (e.stopPropagation) {
+    e.stopPropagation();
+  }
+
+  if (actions.bought_cards.length == 0) return;
+
+  let cards = actions.bought_cards;
+
+  cards.forEach(card => {
+    if (card.live_in != "deck") return;
+
+    card.turn_down();
+    divBaralho.appendChild(card.to_dom);
+  });
+
+  actions.bought_cards = [];
+}
