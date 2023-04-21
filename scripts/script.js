@@ -16,10 +16,13 @@ function create_card(suit, value){
 function stack(){
   return {
     set_child: function(card){
+      console.log(this, card);
       if (!this.is_stackable(card)) return;
 
       if (this.live_in == 'house'){
         card.to_dom.setAttribute("style", "top: 0px;");
+      }else if(this.live_in == 'table'){
+        card.to_dom.setAttribute("style", "top: 20px;");
       }
 
       this.turn_up_parent(card);
@@ -82,10 +85,11 @@ function stack(){
     },
 
     turn_up_parent: function(card){
-      if (card.live_in == 'table' && card.parent != null){
-        card.parent.turn_up();
-        card.parent.child = null;
-      }
+      if (card.live_in == 'deck') return;
+      if (card.parent == null) return;
+
+      card.parent.turn_up();
+      card.parent.child = null;
     }
   }
 }
@@ -274,7 +278,7 @@ function create_houses(){
 
 function game(){
   let deck = create_deck();
-  let cards = deck.cards().sort(() => Math.random() - 0.5);
+  let cards = deck.cards();
 
   return {
     start: function(){
