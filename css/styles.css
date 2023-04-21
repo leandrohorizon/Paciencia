@@ -44,19 +44,19 @@ body {
   background-size: cover, contain;
 }
 
-.copas,
-.ouros {
+.hearts,
+.diamonds {
   background: var(--corVc);
   color: var(--corVf);
 }
 
-.espadas,
-.paus {
+.spades,
+.clubs {
   background: var(--corPc);
   color: var(--corPf);
 }
 
-.carta {
+.card {
   width: var(--largura);
   height: var(--altura);
   position: absolute;
