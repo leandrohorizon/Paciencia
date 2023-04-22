@@ -95,6 +95,10 @@ body {
   flex: 1;
 }
 
+.symbols {
+  font-size: 17pt;
+}
+
 .suits_symbols > div {
   display: flex;
   justify-content: center;

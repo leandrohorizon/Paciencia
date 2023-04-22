@@ -218,6 +218,8 @@ function create_body(suit, value){
 
     new Array(config[index]).fill(null).forEach(() => {
       const symbol = document.createElement('div')
+      symbol.classList.add('symbols');
+
       symbol.innerText = suit;
       suit_symbol.appendChild(symbol);
     });
