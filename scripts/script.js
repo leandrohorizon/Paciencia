@@ -4,8 +4,7 @@ const deck_turn_down = create_deck_turn_down();
 const deck_turn_up = create_deck_turn_up();
 
 const actions = {
-  source: null,
-  bought_cards: []
+  selected_card: null
 }
 
 function game(){
@@ -235,12 +234,12 @@ function dom(suit, value){
 
       if (!this.is_turned_up) return;
 
-      const card = actions.source;
+      const card = actions.selected_card;
 
       if (card != null)
         card.to_dom.style.opacity = "1";
 
-      actions.source = this;
+      actions.selected_card = this;
     },
 
     handleDragOver: function(e) {
@@ -250,7 +249,7 @@ function dom(suit, value){
     },
 
     handleDragEnd: function(e) {
-      const card = actions.source;
+      const card = actions.selected_card;
 
       if (card != null)
         card.to_dom.style.opacity = "1";
@@ -263,7 +262,7 @@ function dom(suit, value){
 
       if (!this.is_turned_up) return;
 
-      this.set_child(actions.source)
+      this.set_child(actions.selected_card)
     },
 
     mouseup: function(e){
@@ -284,14 +283,14 @@ function dom(suit, value){
 
       if (!this.is_turned_up) return;
 
-      if (actions.source == null){
-        actions.source = this;
+      if (actions.selected_card == null){
+        actions.selected_card = this;
         this.to_dom.style.opacity = "0.8";
       }else{
-        this.set_child(actions.source)
-        actions.source.to_dom.style.opacity = "1";
+        this.set_child(actions.selected_card)
+        actions.selected_card.to_dom.style.opacity = "1";
 
-        actions.source = null;
+        actions.selected_card = null;
       }
     }
 
@@ -450,11 +449,11 @@ function slot_dom(dom){
         e.preventDefault();
       }
 
-      let card = actions.source;
+      let card = actions.selected_card;
 
       this.append_child(card);
 
-      actions.source = null;
+      actions.selected_card = null;
     },
 
     mouseup: function(e){
