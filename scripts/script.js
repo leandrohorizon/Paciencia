@@ -84,6 +84,9 @@ function create_deck(){
 
     card_dom.addEventListener("mouseup", card.mouseup.bind(card), false);
 
+    card_dom.addEventListener("mouseover", card.mouseover.bind(card), false);
+    card_dom.addEventListener("mouseout", card.mouseout.bind(card), false);
+
     return card;
   });
 }
@@ -292,8 +295,31 @@ function dom(suit, value){
 
         actions.selected_card = null;
       }
-    }
+    },
 
+    mouseover: function(e){
+      if (e.stopPropagation) {
+        e.stopPropagation();
+      }
+
+      if (!this.is_turned_up) return;
+      if (this.live_in != 'table') return;
+      if (this.child == null) return;
+
+      this.child.to_dom.style.top = '35px';
+    },
+
+    mouseout: function(e){
+      if (e.stopPropagation) {
+        e.stopPropagation();
+      }
+
+      if (!this.is_turned_up) return;
+      if (this.live_in != 'table') return;
+      if (this.child == null) return;
+
+      this.child.to_dom.style.top = '20px';
+    }
   }
 }
 
