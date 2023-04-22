@@ -7,8 +7,10 @@ function create_card(suit, value){
     child:     null,
     parent:    null,
 
+    translate_suit: translate_suit(this.suit),
+    translate_value: translate_value(this.value),
+
     ...stack(),
-    ...translate(),
     ...dom(suit, value)
   }
 }
@@ -16,7 +18,6 @@ function create_card(suit, value){
 function stack(){
   return {
     set_child: function(card){
-      console.log(this, card);
       if (!this.is_stackable(card)) return;
 
       if (this.live_in == 'house'){
@@ -139,7 +140,6 @@ function dom(suit, value){
         e.stopPropagation();
       }
 
-      console.log(this);
 
       if (this.live_in == 'deck' && !this.is_turned_up){
         this.turn_up();
@@ -185,7 +185,6 @@ function create_body(suit, value){
   div.classList.add('body');
 
   const suit_symbols = new Array(3).fill(null);
-  console.log(suit_symbols.length);
 
   const configs = {
     1:  [0, 1, 0],
@@ -218,13 +217,6 @@ function create_body(suit, value){
   });
 
   return div;
-}
-
-function translate(){
-  return {
-    translate_suit: translate_suit(this.suit),
-    translate_value: translate_value(this.value)
-  }
 }
 
 function translate_suit(suit){
