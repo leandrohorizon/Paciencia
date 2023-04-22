@@ -62,7 +62,6 @@ body {
   width: var(--largura);
   height: var(--altura);
 
-  background-color: red;
   display: flex;
   flex-direction: row;
   justify-content: space-evenly;

@@ -156,24 +156,14 @@ function create_sides(side, suit, value){
   const div = document.createElement('div');
   div.classList.add(side);
 
-  value = {
-    1:  'A',
-    11: 'J',
-    12: 'Q',
-    13: 'K'
-  }[value] || value;
+  value = translate_value(value);
 
   const value_div = document.createElement('div');
   value_div.innerText = value;
 
   div.appendChild(value_div);
 
-  suit = {
-    'clubs':    '♣',
-    'diamonds': '♦',
-    'hearts':   '♥',
-    'spades':   '♠'
-  } [suit];
+  suit = translate_suit(suit);
 
   const suit_div = document.createElement('div');
   suit_div.innerText = suit;
@@ -232,24 +222,27 @@ function create_body(suit, value){
 
 function translate(){
   return {
-    translate_suits: function(){
-      return {
-        'clubs':    '♣',
-        'diamonds': '♦',
-        'hearts':   '♥',
-        'spades':   '♠'
-      } [this.suit];
-    },
-
-    translate_value: function(){
-      return {
-        1:  'A',
-        11: 'J',
-        12: 'Q',
-        13: 'K'
-      }[this.value] || this.value;
-    }
+    translate_suit: translate_suit(this.suit),
+    translate_value: translate_value(this.value)
   }
+}
+
+function translate_suit(suit){
+  return {
+    'clubs':    '♣',
+    'diamonds': '♦',
+    'hearts':   '♥',
+    'spades':   '♠'
+  } [suit];
+}
+
+function translate_value(value){
+  return {
+    1:  'A',
+    11: 'J',
+    12: 'Q',
+    13: 'K'
+  }[value] || value;
 }
 
 function create_deck(){
@@ -374,6 +367,7 @@ function create_houses(){
 function game(){
   let deck = create_deck();
   let cards = deck.cards();
+  cards.sort(() => Math.random() - 0.5);
 
   return {
     start: function(){
