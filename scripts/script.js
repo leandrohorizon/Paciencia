@@ -1,3 +1,118 @@
+const tables = create_tables();
+const houses = create_houses();
+const divBaralho = create_deck().to_dom();
+const divComprado = document.getElementById("comprado");
+
+const actions = {
+  source: null,
+  bought_cards: []
+}
+
+function game(){
+  let deck = create_deck();
+  let cards = deck.cards();
+  cards.sort(() => Math.random() - 0.5);
+
+  return {
+    start: function(){
+      this.distribute_cards();
+    },
+
+    distribute_cards: function(){
+      this.distribute_in_table();
+      this.distribute_in_deck();
+    },
+
+    distribute_in_table: function() {
+      let num_cards = 1;
+      tables.forEach(table => {
+        let parent_card = null;
+        let parent_dom = table;
+        for (let i = 0; i < num_cards; i++) {
+          const card = cards.pop();
+          const card_dom = card.to_dom;
+
+          parent_dom.appendChild(card_dom);
+          card.live_in = "table";
+          card.parent = parent_card;
+          card_dom.style.top = parent_dom !== table ? "20px" : "0";
+
+          parent_dom = card_dom;
+          parent_card = card;
+
+          i === num_cards - 1 ? card.turn_up() : card.turn_down();
+        }
+        num_cards++;
+      });
+    },
+
+    distribute_in_deck: function(){
+      cards.forEach(function(card){
+        card_dom = card.to_dom;
+
+        card.turn_down();
+        divBaralho.appendChild(card_dom);
+        card.live_in = "deck";
+      });
+    },
+  }
+}
+
+game().start();
+
+function create_deck(){
+  return {
+    cards: function(){
+      let array = new Array(52).fill(null)
+
+      return array.map(function(_, index){
+        let suit = ['clubs', 'diamonds', 'hearts', 'spades'][Math.floor(index/13)];
+        let value = (index % 13) + 1;
+
+        card = create_card(suit, value);
+
+        card_dom = card.to_dom
+
+        card_dom.addEventListener("dragstart", card.handleDragStart.bind(card), false);
+        card_dom.addEventListener("dragover", card.handleDragOver, false);
+        card_dom.addEventListener("drop", card.handleDrop.bind(card), false);
+        card_dom.addEventListener("dragend", card.handleDragEnd, false);
+
+        card_dom.addEventListener("mouseup", card.mouseup.bind(card), false);
+
+        return card;
+      })
+    },
+
+    to_dom: function(){
+      let deck_dom = document.getElementById("baralho");
+
+      deck_dom.addEventListener("mouseup", voltarCartas);
+
+      function voltarCartas(e){
+        if (e.stopPropagation) {
+          e.stopPropagation();
+        }
+
+        if (actions.bought_cards.length == 0) return;
+
+        let cards = actions.bought_cards;
+
+        cards.forEach(card => {
+          if (card.live_in != "deck") return;
+
+          card.turn_down();
+          deck_dom.appendChild(card.to_dom);
+        });
+
+        actions.bought_cards = [];
+      }
+
+      return deck_dom;
+    }
+  }
+}
+
 function create_card(suit, value){
   return {
     suit:      suit,
@@ -13,6 +128,24 @@ function create_card(suit, value){
     ...stack(),
     ...dom(suit, value)
   }
+}
+
+function translate_suit(suit){
+  return {
+    'clubs':    '♣',
+    'diamonds': '♦',
+    'hearts':   '♥',
+    'spades':   '♠'
+  } [suit];
+}
+
+function translate_value(value){
+  return {
+    1:  'A',
+    11: 'J',
+    12: 'Q',
+    13: 'K'
+  }[value] || value;
 }
 
 function stack(){
@@ -122,7 +255,25 @@ function dom(suit, value){
 
       if (!this.is_turned_up) return;
 
+      const card = actions.source;
+
+      if (card != null)
+        card.to_dom.style.opacity = "1";
+
       actions.source = this;
+    },
+
+    handleDragOver: function(e) {
+      if (e.preventDefault) {
+        e.preventDefault();
+      }
+    },
+
+    handleDragEnd: function(e) {
+      const card = actions.source;
+
+      if (card != null)
+        card.to_dom.style.opacity = "1";
     },
 
     handleDrop: function(e) {
@@ -232,74 +383,6 @@ function create_body(suit, value){
   return div;
 }
 
-function translate_suit(suit){
-  return {
-    'clubs':    '♣',
-    'diamonds': '♦',
-    'hearts':   '♥',
-    'spades':   '♠'
-  } [suit];
-}
-
-function translate_value(value){
-  return {
-    1:  'A',
-    11: 'J',
-    12: 'Q',
-    13: 'K'
-  }[value] || value;
-}
-
-function create_deck(){
-  return {
-    cards: function(){
-      let array = new Array(52).fill(null)
-
-      return array.map(function(_, index){
-        let suit = ['clubs', 'diamonds', 'hearts', 'spades'][Math.floor(index/13)];
-        let value = (index % 13) + 1;
-
-        card = create_card(suit, value);
-
-        card_dom = card.to_dom
-
-        card_dom.addEventListener("dragstart", card.handleDragStart.bind(card), false);
-        card_dom.addEventListener("drop", card.handleDrop.bind(card), false);
-        card_dom.addEventListener("mouseup", card.mouseup.bind(card), false);
-
-        return card;
-      })
-    },
-
-    to_dom: function(){
-      let deck_dom = document.getElementById("baralho");
-
-      deck_dom.addEventListener("mouseup", voltarCartas);
-
-      function voltarCartas(e){
-        if (e.stopPropagation) {
-          e.stopPropagation();
-        }
-
-        if (actions.bought_cards.length == 0) return;
-
-        let cards = actions.bought_cards;
-
-        cards.forEach(card => {
-          if (card.live_in != "deck") return;
-
-          card.turn_down();
-          deck_dom.appendChild(card.to_dom);
-        });
-
-        actions.bought_cards = [];
-      }
-
-      return deck_dom;
-    }
-  }
-}
-
 function create_tables(){
   let tables = document.querySelectorAll(".casa");
   let prevent_default = (e) => {
@@ -376,65 +459,3 @@ function create_houses(){
     return house;
   })
 }
-
-function game(){
-  let deck = create_deck();
-  let cards = deck.cards();
-  // cards.sort(() => Math.random() - 0.5);
-
-  return {
-    start: function(){
-      this.distribute_cards();
-    },
-
-    distribute_cards: function(){
-      this.distribute_in_table();
-      this.distribute_in_deck();
-    },
-
-    distribute_in_table: function() {
-      let num_cards = 1;
-      tables.forEach(table => {
-        let parent_card = null;
-        let parent_dom = table;
-        for (let i = 0; i < num_cards; i++) {
-          const card = cards.pop();
-          const card_dom = card.to_dom;
-
-          parent_dom.appendChild(card_dom);
-          card.live_in = "table";
-          card.parent = parent_card;
-          card_dom.style.top = parent_dom !== table ? "20px" : "0";
-
-          parent_dom = card_dom;
-          parent_card = card;
-
-          i === num_cards - 1 ? card.turn_up() : card.turn_down();
-        }
-        num_cards++;
-      });
-    },
-
-    distribute_in_deck: function(){
-      cards.forEach(function(card){
-        card_dom = card.to_dom;
-
-        card.turn_down();
-        divBaralho.appendChild(card_dom);
-        card.live_in = "deck";
-      });
-    },
-  }
-}
-
-const actions = {
-  source: null,
-  bought_cards: []
-}
-
-const tables = create_tables();
-const houses = create_houses();
-const divBaralho = create_deck().to_dom();
-const divComprado = document.getElementById("comprado");
-
-game().start();
