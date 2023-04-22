@@ -371,36 +371,26 @@ function game(){
       this.distribute_in_deck();
     },
 
-    distribute_in_table: function(){
-      let qtd = 1;
-
-      tables.forEach(function(casa){
+    distribute_in_table: function() {
+      let num_cards = 1;
+      tables.forEach(table => {
         let parent_card = null;
-        let parent_dom = casa;
-
-        for (index = 0; index < qtd; index++){
-          card = cards.pop();
-          card_dom = card.to_dom;
+        let parent_dom = table;
+        for (let i = 0; i < num_cards; i++) {
+          const card = cards.pop();
+          const card_dom = card.to_dom;
 
           parent_dom.appendChild(card_dom);
-
           card.live_in = "table";
           card.parent = parent_card;
-
-          if (parent_dom != casa)
-            card_dom.setAttribute("style", "top: 20px;");
+          card_dom.style.top = parent_dom !== table ? "20px" : "0";
 
           parent_dom = card_dom;
           parent_card = card;
 
-          if (index < qtd - 1) {
-            card.turn_down();
-          } else {
-            card.turn_up();
-          }
+          i === num_cards - 1 ? card.turn_up() : card.turn_down();
         }
-
-        qtd++;
+        num_cards++;
       });
     },
 
