@@ -140,12 +140,25 @@ function dom(suit, value){
         e.stopPropagation();
       }
 
-
       if (this.live_in == 'deck' && !this.is_turned_up){
         this.turn_up();
 
         divComprado.appendChild(e.target);
         actions.bought_cards.push(this)
+
+        return;
+      }
+
+      if (!this.is_turned_up) return;
+
+      if (actions.source == null){
+        actions.source = this;
+        this.to_dom.style.opacity = "0.8";
+      }else{
+        this.set_child(actions.source)
+        actions.source.to_dom.style.opacity = "1";
+
+        actions.source = null;
       }
     }
 
@@ -310,12 +323,16 @@ function create_tables(){
     e.target.appendChild(card.to_dom);
     card.live_in = "table";
     card.to_dom.setAttribute("style", "top: 0px;");
+    card.to_dom.style.opacity = "1";
+
+    actions.source = null;
   }
 
   return [...tables].map(table => {
     table.addEventListener("dragover", prevent_default, false);
     table.addEventListener("drop", moverParaCasa, false);
     table.addEventListener("dragend", prevent_default, false);
+    table.addEventListener("mouseup", moverParaCasa, false);
 
     return table;
   })
@@ -345,12 +362,16 @@ function create_houses(){
     e.target.appendChild(card.to_dom);
     card.live_in = "house";
     card.to_dom.setAttribute("style", "top: 0px;");
+    card.to_dom.style.opacity = "1";
+
+    actions.source = null;
   }
 
   return [...houses].map(house => {
     house.addEventListener("dragover", prevent_default, false);
     house.addEventListener("drop", moverParaNaipe, false);
     house.addEventListener("dragend", prevent_default, false);
+    house.addEventListener("mouseup", moverParaNaipe, false);
 
     return house;
   })
@@ -359,7 +380,7 @@ function create_houses(){
 function game(){
   let deck = create_deck();
   let cards = deck.cards();
-  cards.sort(() => Math.random() - 0.5);
+  // cards.sort(() => Math.random() - 0.5);
 
   return {
     start: function(){
