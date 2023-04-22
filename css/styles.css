@@ -7,10 +7,11 @@
   --corPf: #ddd9ce;
   --corVi: #ddd9ce;
   --corPo: #211e21;
-  --fontF: "Do Hyeon", sans-serif;
+  --fontF: 'Roboto', sans-serif;
 }
 
-@import url("https://fonts.googleapis.com/css?family=Do+Hyeon");
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
+
 * {
   font-size: 10pt;
   font-family: var(--fontF) !important;
