@@ -9,7 +9,7 @@ function create_card(suit, value){
 
     ...stack(),
     ...translate(),
-    ...dom()
+    ...dom(suit, value)
   }
 }
 
@@ -71,7 +71,8 @@ function stack(){
     turn_up: function(){
       this.is_turned_up = true;
       this.to_dom.classList.remove("cartaVirada");
-      this.to_dom.innerHTML = this.translate_value() + this.translate_suits();
+      this.to_dom.innerHTML = this.to_html;
+
       this.to_dom.setAttribute("draggable", "true");
       this.to_dom.classList.add(this.suit);
     },
@@ -94,12 +95,24 @@ function stack(){
   }
 }
 
-function dom(){
+function dom(suit, value){
   const div = document.createElement('div');
   div.classList.add('card');
 
+  const header = create_sides('header', suit, value);
+
+  const body = create_body(suit, value);
+
+  const footer = create_sides('footer', suit, value);
+
+  div.appendChild(header);
+  div.appendChild(body);
+  div.appendChild(footer);
+
   return {
     to_dom: div,
+
+    to_html: div.innerHTML,
 
     handleDragStart: function(e){
       if (e.stopPropagation) {
@@ -126,6 +139,8 @@ function dom(){
         e.stopPropagation();
       }
 
+      console.log(this);
+
       if (this.live_in == 'deck' && !this.is_turned_up){
         this.turn_up();
 
@@ -135,6 +150,82 @@ function dom(){
     }
 
   }
+}
+
+function create_sides(side, suit, value){
+  const div = document.createElement('div');
+  div.classList.add(side);
+
+  value = {
+    1:  'A',
+    11: 'J',
+    12: 'Q',
+    13: 'K'
+  }[value] || value;
+
+  const value_div = document.createElement('div');
+  value_div.innerText = value;
+
+  div.appendChild(value_div);
+
+  suit = {
+    'clubs':    '♣',
+    'diamonds': '♦',
+    'hearts':   '♥',
+    'spades':   '♠'
+  } [suit];
+
+  const suit_div = document.createElement('div');
+  suit_div.innerText = suit;
+
+  div.appendChild(suit_div);
+
+  return div;
+}
+
+function create_body(suit, value){
+  suit = {
+    'clubs':    '♣',
+    'diamonds': '♦',
+    'hearts':   '♥',
+    'spades':   '♠'
+  } [suit];
+
+  const div = document.createElement('div');
+  div.classList.add('body');
+
+  const suit_symbols = new Array(3).fill(null);
+  console.log(suit_symbols.length);
+
+  const configs = {
+    1:  [0, 1, 0],
+    2:  [0, 2, 0],
+    3:  [0, 3, 0],
+    4:  [2, 0, 2],
+    5:  [2, 1, 2],
+    6:  [3, 0, 3],
+    7:  [3, 1, 3],
+    8:  [4, 0, 4],
+    9:  [4, 1, 4],
+    10: [4, 2, 4],
+  }
+
+  const config = configs[value] || configs[1];
+
+  suit_symbols.forEach((_, index) => {
+    const suit_symbol = document.createElement('div');
+    suit_symbol.classList.add('suits_symbols');
+
+    new Array(config[index]).fill(null).forEach(() => {
+      const symbol = document.createElement('div')
+      symbol.innerText = suit;
+      suit_symbol.appendChild(symbol);
+    });
+
+    div.appendChild(suit_symbol);
+  });
+
+  return div;
 }
 
 function translate(){
@@ -227,6 +318,7 @@ function create_tables(){
     if (card.value != 13) return;
 
     card.turn_up_parent(card);
+    card.parent = null
 
     e.target.appendChild(card.to_dom);
     card.live_in = "table";
@@ -261,6 +353,7 @@ function create_houses(){
     if (card.value != 1) return;
 
     card.turn_up_parent(card);
+    card.parent = null;
 
     e.target.appendChild(card.to_dom);
     card.live_in = "house";
@@ -288,16 +381,6 @@ function game(){
     distribute_cards: function(){
       this.distribute_in_table();
       this.distribute_in_deck();
-    },
-
-    distribute_in_deck: function(){
-      cards.forEach(function(card){
-        card_dom = card.to_dom;
-
-        card.turn_down();
-        divBaralho.appendChild(card_dom);
-        card.live_in = "deck";
-      });
     },
 
     distribute_in_table: function(){
@@ -331,7 +414,17 @@ function game(){
 
         qtd++;
       });
-    }
+    },
+
+    distribute_in_deck: function(){
+      cards.forEach(function(card){
+        card_dom = card.to_dom;
+
+        card.turn_down();
+        divBaralho.appendChild(card_dom);
+        card.live_in = "deck";
+      });
+    },
   }
 }
 
