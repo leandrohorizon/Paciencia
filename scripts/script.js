@@ -7,6 +7,8 @@ const actions = {
   selected_card: null
 }
 
+game().start();
+
 function game(){
   let cards = create_deck();
   cards.sort(() => Math.random() - 0.5);
@@ -63,8 +65,6 @@ function game(){
     },
   }
 }
-
-game().start();
 
 function create_deck(){
   let array = new Array(52).fill(null)

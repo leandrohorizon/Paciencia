@@ -10,7 +10,12 @@
   --fontF: 'Roboto', sans-serif;
 }
 
-@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
+@font-face {
+  font-family: 'Roboto';
+  src: url('../assets/fonts/Roboto-Regular.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
 
 * {
   font-size: 10pt;
@@ -41,7 +46,7 @@
 
 body {
   background: white;
-  background-image: url("../images/background.jpg");
+  background-image: url("../assets/images/background.jpg");
   background-size: cover, contain;
 }
 
@@ -118,7 +123,7 @@ virada {
   color: black;
   border-top: solid 1px;
   border-color: black;
-  background-image: url("../images/verse.jpg");
+  background-image: url("../assets/images/verse.jpg");
   background-size: cover;
 }
 
