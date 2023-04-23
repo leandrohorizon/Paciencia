@@ -488,13 +488,6 @@ function create_slot(type, dom){
       return this.last_child(child.child);
     },
 
-    remove_children: function(card){
-      if (this.children.length == 0) return;
-
-      const index = this.children.indexOf(card);
-      return this.children.splice(index, this.children.length - index);
-    },
-
     ...slot_dom(dom)
   }
 }
