@@ -43,14 +43,9 @@ function game(){
 
     distribute_in_deck: function(){
       cards.forEach(function(card){
-        card_dom = card.to_dom;
-
         card.turn_down();
 
-        deck_turn_down.to_dom.appendChild(card_dom);
-
-        card.slot = deck_turn_down;
-        card.live_in = "deck";
+        deck_turn_down.append_child(card);
       });
     },
   }
@@ -275,7 +270,7 @@ function dom(suit, value){
       if (this.live_in.includes('deck') && !this.is_turned_up){
         this.turn_up();
 
-        deck_turn_up.append_child(this);
+        deck_turn_up.last_child().append_child(this);
 
         return;
       }
@@ -306,20 +301,20 @@ function dom(suit, value){
 
       for (let index = 0; index < houses.length; index++) {
         const house = houses[index];
-        const last_children = house.last_children();
+        const last_child = house.last_child();
 
-        if (last_children.valid_child(this)){
-          last_children.set_child(this);
+        if (last_child.valid_child(this)){
+          last_child.set_child(this);
           return false;
         }
       }
 
       for (let index = 0; index < tables.length; index++) {
         const table = tables[index];
-        const last_children = table.last_children();
+        const last_child = table.last_child();
 
-        if (last_children.valid_child(this)){
-          last_children.set_child(this);
+        if (last_child.valid_child(this)){
+          last_child.set_child(this);
           return false;
         }
       }
@@ -469,6 +464,8 @@ function create_slot(type, dom){
     },
 
     append_child: function(card){
+      if (card.parent != null) card.parent.child = null;
+
       card.parent = this;
       card.live_in = this.type;
       card.slot = this;
@@ -480,10 +477,10 @@ function create_slot(type, dom){
       this.to_dom.appendChild(card.to_dom);
     },
 
-    last_children: function(child = this){
+    last_child: function(child = this){
       if (child.child == null) return child;
 
-      return this.last_children(child.child);
+      return this.last_child(child.child);
     },
 
     remove_children: function(card){
@@ -525,20 +522,20 @@ function slot_dom(dom){
       }
 
       if (this.type != 'deck_turn_down') return;
+      if (this.child != null) return;
 
-      if (this.children.length != 0) return;
+      let card = deck_turn_up.last_child();
 
-      let cards = deck_turn_up.children.reverse();
-
-      cards.forEach(card => {
-        if (card.live_in != "deck") return;
+      while(card != null){
+        if(card.turn_down == null) break;
 
         card.turn_down();
+        new_card = card.parent;
 
-        this.to_dom.appendChild(card.to_dom);
-      });
+        this.append_child(card);
 
-      deck_turn_up.children = [];
+        card = new_card;
+      }
     }
   }
 }
