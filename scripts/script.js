@@ -27,25 +27,16 @@ function game(){
       let num_cards = 1;
 
       tables.forEach(table => {
-        let parent_card = null;
-        let parent_dom = table.to_dom;
+        let parent = table;
         for (let i = 0; i < num_cards; i++) {
           const card = cards.pop();
-          const card_dom = card.to_dom;
 
-          parent_dom.appendChild(card_dom);
-          card.live_in = "table";
-          card.parent = parent_card;
-          card.slot = table;
-          table.children.push(card);
-
-          card_dom.style.top = parent_dom !== table.to_dom ? "20px" : "0";
-
-          parent_dom = card_dom;
-          parent_card = card;
+          parent.append_child(card);
+          parent = card;
 
           i === num_cards - 1 ? card.turn_up() : card.turn_down();
         }
+
         num_cards++;
       });
     },
@@ -57,7 +48,6 @@ function game(){
         card.turn_down();
 
         deck_turn_down.to_dom.appendChild(card_dom);
-        deck_turn_down.children.push(card);
 
         card.slot = deck_turn_down;
         card.live_in = "deck";
@@ -83,6 +73,8 @@ function create_deck(){
     card_dom.addEventListener("dragend", card.handleDragEnd, false);
 
     card_dom.addEventListener("mouseup", card.mouseup.bind(card), false);
+    card_dom.addEventListener("dblclick", card.dblclick.bind(card), false);
+    card_dom.addEventListener("contextmenu", card.dblclick.bind(card), false);
 
     card_dom.addEventListener("mouseover", card.mouseover.bind(card), false);
     card_dom.addEventListener("mouseout", card.mouseout.bind(card), false);
@@ -130,28 +122,15 @@ function translate_value(value){
 function stack(){
   return {
     set_child: function(card){
-      if (!this.is_stackable(card)) return;
-
-      if (this.live_in == 'house'){
-        card.to_dom.setAttribute("style", "top: 0px;");
-      }else if(this.live_in == 'table'){
-        card.to_dom.setAttribute("style", "top: 20px;");
-      }
+      if (!this.valid_child(card)) return;
 
       this.turn_up_parent(card);
 
-      this.child = card;
-      card.parent = this;
-      card.live_in = this.live_in;
-
-      card.slot.remove_child(card);
-      card.slot = this.slot;
-
-      this.to_dom.appendChild(card.to_dom);
+      this.append_child(card);
     },
 
-    is_stackable: function(card){
-      if (this.live_in == 'deck') return false;
+    valid_child: function(card){
+      if (this.live_in.includes('deck')) return false;
       if (this.child != null) return false;
       if (!card.is_turned_up) return false;
 
@@ -162,6 +141,21 @@ function stack(){
       }
 
       return card.different_color(this) && this.is_lower_than(card)
+    },
+
+    append_child: function(card){
+      card.parent = this;
+      card.live_in = this.live_in;
+      card.slot = this.slot;
+
+      if (this.live_in == 'table'){
+        card.to_dom.setAttribute("style", "top: 20px;");
+      }else{
+        card.to_dom.setAttribute("style", "top: 0px;");
+      }
+
+      this.child = card;
+      this.to_dom.appendChild(card.to_dom);
     },
 
     same_suit: function(card){
@@ -202,11 +196,14 @@ function stack(){
     },
 
     turn_up_parent: function(card){
-      if (card.live_in == 'deck') return;
+      if (card.live_in.includes('deck')) return;
       if (card.parent == null) return;
 
-      card.parent.turn_up();
-      card.parent.child = null;
+      const parent = card.parent;
+      parent.child = null;
+
+      if (parent.turn_up == null) return;
+      parent.turn_up();
     }
   }
 }
@@ -273,13 +270,12 @@ function dom(suit, value){
         e.stopPropagation();
       }
 
-      if (this.live_in == 'deck' && !this.is_turned_up){
+      if (e.which != 1) return;
+
+      if (this.live_in.includes('deck') && !this.is_turned_up){
         this.turn_up();
 
-        deck_turn_up.to_dom.appendChild(e.target);
-        deck_turn_up.children.push(this);
-
-        this.slot.remove_child(this);
+        deck_turn_up.append_child(this);
 
         return;
       }
@@ -294,6 +290,38 @@ function dom(suit, value){
         actions.selected_card.to_dom.style.opacity = "1";
 
         actions.selected_card = null;
+      }
+    },
+
+    dblclick: function(e){
+      if (e.stopPropagation) {
+        e.stopPropagation();
+      }
+
+      if (e.preventDefault) {
+        e.preventDefault();
+      }
+
+      if (!this.is_turned_up) return false;
+
+      for (let index = 0; index < houses.length; index++) {
+        const house = houses[index];
+        const last_children = house.last_children();
+
+        if (last_children.valid_child(this)){
+          last_children.set_child(this);
+          return false;
+        }
+      }
+
+      for (let index = 0; index < tables.length; index++) {
+        const table = tables[index];
+        const last_children = table.last_children();
+
+        if (last_children.valid_child(this)){
+          last_children.set_child(this);
+          return false;
+        }
       }
     },
 
@@ -414,28 +442,19 @@ function create_deck_turn_up(){
 
 function create_slot(type, dom){
   return {
-    type:     type,
-    children: [],
+    type:  type,
+    child: null,
 
-    append_child: function(card){
+    set_child: function(card){
       if (!this.valid_child(card)) return;
 
-      this.children.push(card);
-
       card.turn_up_parent(card);
-      card.parent = null;
-      card.live_in = this.type;
-      card.to_dom.setAttribute("style", "top: 0px;");
-      card.to_dom.style.opacity = "1";
-
-      card.slot.remove_child(card);
-      card.slot = this;
-
-      this.to_dom.appendChild(card.to_dom);
+      this.append_child(card);
     },
 
     valid_child: function(card){
-      if (this.children.length != 0) return false;
+      if (card == null) return false;
+      if (this.child != null) return false;
       if (this.type == 'deck_turn_up') return false;
       if (this.type == 'deck_turn_down') return false;
 
@@ -449,11 +468,29 @@ function create_slot(type, dom){
       }
     },
 
-    remove_child: function(card){
+    append_child: function(card){
+      card.parent = this;
+      card.live_in = this.type;
+      card.slot = this;
+
+      card.to_dom.setAttribute("style", "top: 0px;");
+      card.to_dom.style.opacity = "1";
+
+      this.child = card;
+      this.to_dom.appendChild(card.to_dom);
+    },
+
+    last_children: function(child = this){
+      if (child.child == null) return child;
+
+      return this.last_children(child.child);
+    },
+
+    remove_children: function(card){
       if (this.children.length == 0) return;
 
       const index = this.children.indexOf(card);
-      this.children.splice(index, this.children.length - index);
+      return this.children.splice(index, this.children.length - index);
     },
 
     ...slot_dom(dom)
@@ -477,7 +514,7 @@ function slot_dom(dom){
 
       let card = actions.selected_card;
 
-      this.append_child(card);
+      this.set_child(card);
 
       actions.selected_card = null;
     },
@@ -486,7 +523,6 @@ function slot_dom(dom){
       if (e.stopPropagation) {
         e.stopPropagation();
       }
-
 
       if (this.type != 'deck_turn_down') return;
 
@@ -499,7 +535,6 @@ function slot_dom(dom){
 
         card.turn_down();
 
-        this.children.push(card);
         this.to_dom.appendChild(card.to_dom);
       });
 
