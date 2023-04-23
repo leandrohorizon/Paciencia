@@ -139,9 +139,14 @@ function stack(){
     },
 
     append_child: function(card){
-      card.parent = this;
+      if (card.parent != null){
+        card.parent.child = null;
+      }
+
       card.live_in = this.live_in;
       card.slot = this.slot;
+
+      card.parent = this;
 
       if (this.live_in == 'table'){
         card.to_dom.setAttribute("style", "top: 20px;");
