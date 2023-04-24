@@ -18,11 +18,6 @@
   font-variant: normal;
 }
 
-* {
-  font-size: 10pt;
-  font-family: var(--fontF) !important;;
-}
-
 .posicoes {
   position: absolute;
   width: 724px;
@@ -64,6 +59,8 @@ body {
 }
 
 .card{
+  font-family: monospace;
+
   position: absolute;
   border-radius: 8px;
   width: var(--largura);
