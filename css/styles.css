@@ -10,14 +10,6 @@
   --fontF: 'Roboto', sans-serif;
 }
 
-@font-face {
-  font-family: 'Roboto';
-  src: url('../assets/fonts/Roboto-Regular.ttf') format('truetype');
-  font-weight: normal;
-  font-style: normal;
-  font-variant: normal;
-}
-
 .posicoes {
   position: absolute;
   width: 724px;
