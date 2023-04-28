@@ -128,6 +128,10 @@ function stack(){
       if (this.live_in.includes('deck')) return false;
       if (this.child != null) return false;
       if (!card.is_turned_up) return false;
+      
+      if (card.live_in == 'deck'){
+        if (card.child != null) return false; 
+      }
 
       if(this.live_in == 'house'){
         if (card.child != null) return false;
