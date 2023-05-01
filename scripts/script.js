@@ -1,11 +1,20 @@
+import { historic_object } from "./historic/object.js";
+
 const tables = create_slots("table", document.querySelectorAll(".casa"));
 const houses = create_slots("house", document.querySelectorAll(".naipe"));
 const deck_turn_down = create_deck_turn_down();
 const deck_turn_up = create_deck_turn_up();
 
 const actions = {
-  selected_card: null
+  selected_card: null,
+  historic: historic_object()
 }
+
+document.addEventListener('keydown', function(event) {
+  if (event.ctrlKey && event.key === 'z') {
+    actions.historic.go_back();
+  }
+});
 
 game().start();
 
@@ -55,12 +64,12 @@ function create_deck(){
   let array = new Array(52).fill(null)
 
   return array.map(function(_, index){
-    let suit = ['clubs', 'diamonds', 'hearts', 'spades'][Math.floor(index/13)];
-    let value = (index % 13) + 1;
+    const suit = ['clubs', 'diamonds', 'hearts', 'spades'][Math.floor(index/13)];
+    const value = (index % 13) + 1;
 
-    card = create_card(suit, value);
+    const card = create_card(suit, value);
 
-    card_dom = card.to_dom
+    const card_dom = card.to_dom
 
     card_dom.addEventListener("dragstart", card.handleDragStart.bind(card), false);
     card_dom.addEventListener("dragover", card.handleDragOver, false);
@@ -88,8 +97,8 @@ function create_card(suit, value){
     parent:    null,
     slot:      null,
 
-    translate_suit: translate_suit(this.suit),
-    translate_value: translate_value(this.value),
+    translate_suit: translate_suit(suit),
+    translate_value: translate_value(value),
 
     ...stack(),
     ...dom(suit, value)
@@ -118,6 +127,8 @@ function stack(){
   return {
     set_child: function(card){
       if (!this.valid_child(card)) return;
+
+      actions.historic.update(card);
 
       this.turn_up_parent(card);
 
@@ -277,6 +288,8 @@ function dom(suit, value){
       if (e.which != 1) return;
 
       if (this.live_in.includes('deck') && !this.is_turned_up){
+        actions.historic.update(this);
+
         this.turn_up();
 
         deck_turn_up.last_child().append_child(this);
@@ -420,7 +433,7 @@ function create_body(suit, value){
 function create_slots(type, divs){
   return [...divs].map(div => {
     div = create_slot(type, div);
-    div_dom = div.to_dom;
+    const div_dom = div.to_dom;
 
     div_dom.addEventListener("dragover", div.prevent_default.bind(div), false);
     div_dom.addEventListener("drop", div.handleDrop.bind(div), false);
@@ -451,6 +464,8 @@ function create_slot(type, dom){
 
     set_child: function(card){
       if (!this.valid_child(card)) return;
+
+      actions.historic.update(card);
 
       card.turn_up_parent(card);
       this.append_child(card);
@@ -531,16 +546,18 @@ function slot_dom(dom){
       if (this.child != null) return;
 
       let card = deck_turn_up.last_child();
+      actions.historic.update(card, false);
 
       while(card != null){
         if(card.turn_down == null) break;
 
         card.turn_down();
-        new_card = card.parent;
+        const new_card = card.parent;
 
         this.append_child(card);
 
         card = new_card;
+        actions.historic.update(card, true);
       }
     }
   }
