@@ -23,4 +23,6 @@ export function historic_go_back(){
   }
 
   parent_old.append_child(card);
+
+  if (action.skip) this.go_back();
 }

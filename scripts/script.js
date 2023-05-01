@@ -546,16 +546,18 @@ function slot_dom(dom){
       if (this.child != null) return;
 
       let card = deck_turn_up.last_child();
+      actions.historic.update(card, false);
 
       while(card != null){
         if(card.turn_down == null) break;
 
         card.turn_down();
-        new_card = card.parent;
+        const new_card = card.parent;
 
         this.append_child(card);
 
         card = new_card;
+        actions.historic.update(card, true);
       }
     }
   }
