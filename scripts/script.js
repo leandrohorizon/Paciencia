@@ -55,12 +55,12 @@ function create_deck(){
   let array = new Array(52).fill(null)
 
   return array.map(function(_, index){
-    let suit = ['clubs', 'diamonds', 'hearts', 'spades'][Math.floor(index/13)];
-    let value = (index % 13) + 1;
+    const suit = ['clubs', 'diamonds', 'hearts', 'spades'][Math.floor(index/13)];
+    const value = (index % 13) + 1;
 
-    card = create_card(suit, value);
+    const card = create_card(suit, value);
 
-    card_dom = card.to_dom
+    const card_dom = card.to_dom
 
     card_dom.addEventListener("dragstart", card.handleDragStart.bind(card), false);
     card_dom.addEventListener("dragover", card.handleDragOver, false);
@@ -88,8 +88,8 @@ function create_card(suit, value){
     parent:    null,
     slot:      null,
 
-    translate_suit: translate_suit(this.suit),
-    translate_value: translate_value(this.value),
+    translate_suit: translate_suit(suit),
+    translate_value: translate_value(value),
 
     ...stack(),
     ...dom(suit, value)
@@ -420,7 +420,7 @@ function create_body(suit, value){
 function create_slots(type, divs){
   return [...divs].map(div => {
     div = create_slot(type, div);
-    div_dom = div.to_dom;
+    const div_dom = div.to_dom;
 
     div_dom.addEventListener("dragover", div.prevent_default.bind(div), false);
     div_dom.addEventListener("drop", div.handleDrop.bind(div), false);
