@@ -11,8 +11,6 @@ export function historic_go_back(){
   turn_card(card, is_turned_up);
   turn_card(parent_old, parent_old_is_turned_up);
 
-  console.log(card, card.child);
-
   parent_old.append_child(card);
 
   if (action.skip) this.go_back();

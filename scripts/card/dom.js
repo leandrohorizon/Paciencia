@@ -65,8 +65,6 @@ export function dom(suit, value){
         e.stopPropagation();
       }
 
-      console.log(this);
-
       if (e.which != 1) return;
 
       if (this.live_in.includes('deck') && !this.is_turned_up){

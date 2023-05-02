@@ -3,7 +3,7 @@ import { tables, deck_turn_down } from "../globals.js";
 
 export function game(){
   let cards = create_deck();
-  // cards.sort(() => Math.random() - 0.5);
+  cards.sort(() => Math.random() - 0.5);
 
   return {
     start: function(){
