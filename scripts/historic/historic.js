@@ -1,7 +1,7 @@
 import { historic_update } from './update.js'
 import { historic_go_back } from './go_back.js'
 
-export function historic_object(){
+export function create_historic(){
   return {
     actions: [],
 
