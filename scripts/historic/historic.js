@@ -1,11 +1,15 @@
-import { historic_update } from './update.js'
-import { historic_go_back } from './go_back.js'
+import { append, push } from './writer.js'
+import { travel_to_past, travel_to_future } from './navigate.js'
 
 export function create_historic(){
   return {
-    actions: [],
+    actions_past: [],
+    actions_future: [],
 
-    update: historic_update,
-    go_back: historic_go_back
+    append,
+    push,
+
+    travel_to_past,
+    travel_to_future
   }
 }

@@ -5,7 +5,7 @@ export function stack(){
     set_child: function(card){
       if (!this.valid_child(card)) return;
 
-      actions.historic.update(card);
+      actions.historic.append({ card: card });
 
       this.turn_up_parent(card);
       this.append_child(card);

@@ -68,11 +68,12 @@ export function dom(suit, value){
       if (e.which != 1) return;
 
       if (this.live_in.includes('deck') && !this.is_turned_up){
-        actions.historic.update(this);
+        const card = deck_turn_up.last_child()
+        actions.historic.append({ card: this });
 
         this.turn_up();
 
-        deck_turn_up.last_child().append_child(this);
+        card.append_child(this);
 
         return;
       }
