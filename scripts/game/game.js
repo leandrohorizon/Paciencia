@@ -1,9 +1,20 @@
 import { create_deck } from '../card/deck.js';
 import { tables, deck_turn_down } from "../globals.js";
+import { actions } from "../globals.js";
 
 export function game(){
   let cards = create_deck();
   cards.sort(() => Math.random() - 0.5);
+
+  document.addEventListener('keydown', function(event) {
+    if (event.ctrlKey && event.key == 'z') {
+      actions.historic.travel_to_past();
+    }
+
+    if (event.ctrlKey && event.key == 'y') {
+      actions.historic.travel_to_future();
+    }
+  });
 
   return {
     start: function(){
@@ -26,7 +37,7 @@ export function game(){
           parent.append_child(card);
           parent = card;
 
-          i === num_cards - 1 ? card.turn_up() : card.turn_down();
+          i == num_cards - 1 ? card.turn_up() : card.turn_down();
         }
 
         num_cards++;
