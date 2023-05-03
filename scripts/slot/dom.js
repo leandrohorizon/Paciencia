@@ -31,7 +31,7 @@ export function dom(dom){
       if (this.child != null) return;
 
       let card = deck_turn_up.last_child();
-      actions.historic.update(card, false);
+      actions.historic.append({ card: card });
 
       while(card != null){
         if(card.turn_down == null) break;
@@ -42,7 +42,7 @@ export function dom(dom){
         this.append_child(card);
 
         card = new_card;
-        actions.historic.update(card, true);
+        actions.historic.append({ card: card, skip: true });
       }
     }
   }
